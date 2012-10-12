@@ -29,14 +29,30 @@ GLuint UNIFORM_transfromationMatrix;
 struct GLMatrix4 {
 	GLfloat mat[16];
 
-	void create_rotation_matrix_4x4(GLfloat x, GLfloat y, GLfloat z, GLfloat theta, GLfloat *mat){
+	void create_rotation_matrix_4x4Y(GLfloat x, GLfloat y, GLfloat z, GLfloat theta, GLfloat *mat){
 		const GLfloat c = cos(theta), s = sin(theta);
 		mat[0] = c, mat[4] = 0, mat[8] = s,	mat[12] = (x*(1-c))-(z*s);
 		mat[1] = 0, mat[5] = 1, mat[9] = 0,	mat[13] = 0;
 		mat[2] = -1*s, mat[6] = 0, mat[10] = c, mat[14] = (x*s )+ (z*(1-c));
 		mat[3] = 0, mat[7] = 0, mat[11] =0, mat[15] = 1;
 	}
-	
+
+	void create_rotation_matrix_4x4X(GLfloat x, GLfloat y, GLfloat z, GLfloat theta, GLfloat *mat) {
+		const GLfloat c = cos(theta), s = sin(theta);
+		mat[0] = 1, mat[4] = 0, mat[8] = 0,	mat[12] = 0;
+		mat[1] = 0, mat[5] = c, mat[9] = -1*s,	mat[13] = (s*z)+(y*(1-c));
+		mat[2] = 0, mat[6] = s, mat[10] = c, mat[14] = (-1*y*s)+(z*(1-c));
+		mat[3] = 0, mat[7] = 0, mat[11] =0, mat[16] = 1;
+	}
+
+	void create_rotation_matrix_4x4Z(GLfloat x, GLfloat y, GLfloat z, GLfloat theta, GLfloat *mat) {
+		const GLfloat c = cos(theta), s = sin(theta);
+		mat[0] = c, mat[4] = -s, mat[8] = 0,	mat[12] = (x*(1-c))+(y*s);
+		mat[1] = s, mat[5] = c, mat[9] = 0,	mat[13] = (y*(1-c))-(-1*s*x);
+		mat[2] = 0, mat[6] = 0, mat[10] = 1, mat[14] = 0;
+		mat[3] = 0, mat[7] = 0, mat[11] =0, mat[15] = 1;
+	}
+
 	void setIdentity() {
 		mat[0] = 1, mat[4] = 0, mat[8] = 0, mat[12] = 0;
 		mat[1] = 0, mat[5] = 1, mat[9] = 0, mat[13] = 0;
@@ -44,10 +60,18 @@ struct GLMatrix4 {
 		mat[3] = 0, mat[7] = 0, mat[11] = 0, mat[15] = 1;
 	}
 	
-	void setRotation(GLfloat x, GLfloat y, GLfloat z, GLfloat theta) {
-		create_rotation_matrix_4x4(x, y, z, theta, mat);
+	void setRotationX(GLfloat x, GLfloat y, GLfloat z, GLfloat theta) {
+		create_rotation_matrix_4x4X(x, y, z, theta, mat);
 	}
 	
+	void setRotationY(GLfloat x, GLfloat y, GLfloat z, GLfloat theta) {
+		create_rotation_matrix_4x4Y(x, y, z, theta, mat);
+	}
+
+	void setRotationZ(GLfloat x, GLfloat y, GLfloat z, GLfloat theta) {
+		create_rotation_matrix_4x4Z(x, y, z, theta, mat);
+	}
+
 	void setTranslation(GLfloat x, GLfloat y, GLfloat z) {
 		mat[0] = 1, mat[4] = 0, mat[8] = 0, mat[12] = x;
 		mat[1] = 0, mat[5] = 1, mat[9] = 0, mat[13] = y;
@@ -314,7 +338,7 @@ void createScene(SceneNode &root, vector<SceneNode*> &nodeList) {
 	coordinateFrame->transform.scale(0.5,0.5,0);
 	
 	root.children.push_back(nodeList[2] = new RegularPolygonNode(.3, 4, 0xFF00AAAA));
-	nodeList[2]->transform.setRotation(0.5, 0.5, 0,MY_PI/6);
+	nodeList[2]->transform.setRotationY(0.5, 0.5, 0,MY_PI/6);
 	nodeList[2]->transform.translate(0, 0.5,0);
 	nodeList[2]->children.push_back(coordinateFrame);
 	
@@ -430,7 +454,7 @@ int main() {
 	RectNode cameraNode(2, 2, 0xFF00FF00, 4);
 	
 	RegularPolygonNode bg(sqrt(2.0f), 4, 0xFF000000);
-	bg.transform.setRotation(0,0,0,MY_PI/4);
+	bg.transform.setRotationY(0,0,0,MY_PI/4);
 	
 	vector<SceneNode*> nodeList;
 	root.transform.setIdentity();
@@ -474,7 +498,7 @@ int main() {
 		cameraNode.transform.setIdentity();
 		cameraNode.transform.scale(camS, camS,0);
 		GLMatrix4 rotationMatrix;
-		rotationMatrix.setRotation(0, 0, 0, camRot);
+		rotationMatrix.setRotationY(0, 0, 0, camRot);
 		cameraNode.transform = rotationMatrix * cameraNode.transform;
 		cameraNode.transform.translate(camX, camY,0);
 		
